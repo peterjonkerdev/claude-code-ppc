@@ -1,105 +1,91 @@
 # claude-code-ppc
 
-A plug-and-play template for building agentic PPC systems with Claude Code or any AI coding agent.
-
-Clone it, point your agent at it, and start talking. The agent walks you through setup and starts building immediately.
+A starting point for building agentic PPC systems with an AI coding agent.
 
 **Based on:** [Agentic Coding for PPC: Claude Code Setup](https://peterjonker.dev/posts/agentic-coding-ppc-claude-code/)
 
 ---
 
-## How it works
+## New to Claude Code?
 
-This repository contains the documentation layer your AI agent needs to understand your advertising setup. It is not code — it is structured context. Your agent reads it, asks you questions, learns your stack, and then builds the code.
+Claude Code is a terminal-based AI coding agent. It reads your files, writes code, runs queries, and iterates — it doesn't just suggest snippets in a chat window. It's the difference between getting advice and having someone actually build the thing with you.
 
-On first open, your agent will:
-1. Read `CLAUDE.md` (automatic in Claude Code)
-2. Detect the repo is not yet initialized
-3. Interview you about your environment, BigQuery, Google Ads account, and business context
-4. Write your answers to `setup/context.md`
-5. Clean up any template content that doesn't apply to you
-6. Ask what you want to build first, and start building
+For PPC, that means:
 
-Every session after that, the agent reads your context and picks up where you left off.
+- Ask it to analyze your search term data and it writes the SQL, runs it against BigQuery, reads the output, and gives you the analysis
+- Tell it to build a classification pipeline and it writes the Python, tests it, fixes the errors, and validates the output
+- Ask for a weekly performance report and it queries your data, writes the narrative, and formats the output
+
+**The architecture this is built around:**
+```
+Data warehouse (BigQuery or similar)
+    ↓
+Python pipelines — orchestration and logic
+    ↓
+LLM APIs — Gemini, Claude, OpenAI — for reasoning and classification
+    ↓
+Ad platform APIs — push changes back to Google Ads, Meta, etc.
+```
+
+Your agent manages the code. You provide the domain expertise and strategic direction.
+
+**Install Claude Code:** [docs.anthropic.com/en/docs/claude-code](https://docs.anthropic.com/en/docs/claude-code)
 
 ---
 
-## Prerequisites
+## Already using Claude Code?
 
-Install these before cloning:
+Use this repo as inspiration. The patterns that matter:
 
-| Tool | Purpose | Install |
-|------|---------|---------|
-| Claude Code | AI coding agent | [docs.anthropic.com/en/docs/claude-code](https://docs.anthropic.com/en/docs/claude-code) |
-| Python 3.9+ | Running pipelines | [python.org](https://python.org) |
-| Google Cloud SDK | BigQuery + auth | [cloud.google.com/sdk/docs/install](https://cloud.google.com/sdk/docs/install) |
-| bq CLI | Query BigQuery from terminal | Included with Cloud SDK |
+- **`CLAUDE.md`** — operating instructions your agent reads on every session. Keep it under 80 lines. Every line costs context.
+- **`docs/index.md`** — a navigation layer so the agent finds the right doc without loading everything at once
+- **`projects/*/GOAL.md`** — one file per project describing what it is, current state, what's next. Prevents re-briefing every session.
+- **Skills** — reusable routines in `.claude/skills/`. If you explain the same thing to your agent twice, write a skill for it.
 
-You will also need:
-- A GCP project with BigQuery enabled
-- Google Ads Data Transfer set up (recommended — gives you full account data in BigQuery)
-- API keys for whatever LLM you plan to use (Gemini, Claude, OpenAI, etc.)
-
-Optional but useful:
-- Google Ads API developer token (for writing changes back to your accounts)
-- A web search API key like Tavily (for search term enrichment workflows)
+Clone it, strip out what doesn't apply, add what does.
 
 ---
 
 ## Quick start
 
 ```bash
-# Clone the repo
 git clone https://github.com/peterjonkerdev/claude-code-ppc.git
 cd claude-code-ppc
 
-# Copy the environment variable template
 cp .env.example .env
-# Edit .env with your API keys (never commit this file)
+# Add your API keys to .env
 
-# Open in Claude Code
 claude
-# The agent reads CLAUDE.md automatically and starts the setup interview
+# Claude reads CLAUDE.md automatically.
+# It will detect setup hasn't run and walk you through it.
 ```
 
-If you use a different agent (Cursor, Windsurf, Copilot, etc.), point it at `CLAUDE.md` and tell it: "Read this file and follow the initialization instructions."
+**Using a different agent?** (Cursor, Windsurf, Copilot, etc.)
+Point it at `CLAUDE.md` and say: *"Read this file and follow the initialization instructions before doing anything else."*
 
 ---
 
-## What you can build
-
-| Use case | What it does |
-|----------|-------------|
-| Search term classification | AI classifies thousands of search terms, routes to the right campaign and ad group, surfaces negatives for review |
-| Budget optimization | Predictive budget allocation across campaigns based on historical ROI and performance trends |
-| Automated reporting | Weekly and monthly performance reports generated directly from BigQuery |
-| Ad copy automation | AI-generated headline and description variants, rotated based on performance signals |
-| LTV or margin-aware bidding | Optimize toward predicted customer value or product margin rather than last-click ROAS |
-| Data chat | Natural language interface to your BigQuery data — ask questions, get answers |
-| Forecasting | Demand and conversion forecasts down to SKU or campaign level |
-
----
-
-## Repository structure
+## What's in here
 
 ```
-CLAUDE.md                    # Agent operating instructions — read automatically
+CLAUDE.md                    # Agent operating instructions — loaded every session
 README.md                    # This file
 
 setup/
-  context.md                 # Your setup, filled in during the first session
+  context.md                 # Your setup — filled in during the first session
+  SETUP.md                   # Setup interview — runs once on first session
 
 docs/
-  index.md                   # Navigation layer — tells the agent what docs exist and where
+  index.md                   # Navigation layer — what docs exist and where
 
-bigquery/
-  README.md                  # Decision tree: which table to use for which question
+bigquery/                    # Optional — only relevant if you use BigQuery
+  README.md                  # Decision tree: which table for which question
   schemas/
     google_ads_transfer.md   # Full reference for Google Ads Data Transfer tables
-    _template.md             # Template for documenting any new table
+    _template.md             # Template for documenting any table
   metrics/
-    calculated-metrics.md    # Canonical metric formulas (CAC, LTV:CAC, ROAS, etc.)
-    channel-breakdown.md     # Channel and subchannel taxonomy
+    calculated-metrics.md    # CAC, LTV:CAC, ROAS and other metric formulas
+    channel-breakdown.md     # Channel and subchannel taxonomy template
 
 projects/
   _template/
@@ -108,51 +94,36 @@ projects/
 .claude/
   skills/
     repo-health/             # Audits the repo for missing docs and dead links
-    visualize-flow/          # Generates Mermaid diagrams of pipeline architectures
+    visualize-flow/          # Generates Mermaid diagrams of data flows
     weekly-update/           # Weekly progress summary from git history
-    learning-opportunity/    # Teaching mode — explains concepts using your actual code
+    learning-opportunity/    # Teaching mode — explains concepts using your code
 
 .env.example                 # Environment variable template
 ```
+
+The BigQuery docs are the most opinionated part of this repo. If you're on a different stack — Snowflake, Redshift, Looker, spreadsheets — ignore that folder and build your own data layer docs using `bigquery/schemas/_template.md` as a starting point.
 
 ---
 
 ## Skills
 
-Skills are reusable routines the agent follows when you invoke them. They're implemented as Markdown files in `.claude/skills/` — not code.
+Reusable routines your agent follows on demand. Trigger them conversationally.
 
 | Skill | How to trigger | What it does |
 |-------|---------------|-------------|
-| `repo-health` | "run repo-health" | Audits the repo: checks every project has a GOAL.md, all docs are indexed, no dead links |
-| `visualize-flow` | "visualize the [project] flow" | Generates a Mermaid architecture diagram for any pipeline or data flow |
-| `weekly-update` | "give me a weekly update" | Compiles progress from git history, proposes task status changes |
-| `learning-opportunity` | "explain this to me" | Teaching mode — explains any concept at three depth levels using your actual code |
+| `repo-health` | "run repo-health" | Checks every project has a GOAL.md, all docs are indexed, no dead links |
+| `visualize-flow` | "visualize the X flow" | Mermaid architecture diagram for any pipeline |
+| `weekly-update` | "give me a weekly update" | Progress summary from git history |
+| `learning-opportunity` | "explain this to me" | Explains any concept at three depth levels using your actual code |
 
-Skills are templates. Adapt them to your stack (add a Slack webhook to weekly-update, connect weekly-update to your task manager, etc.).
-
----
-
-## The architecture
-
-```
-BigQuery (data warehouse)
-    ↓
-Python pipelines (orchestration + logic)
-    ↓
-LLM APIs — Gemini, Claude, OpenAI (reasoning + classification)
-    ↓
-Google Ads API (execution — push changes back to accounts)
-```
-
-Your agent manages the code. You provide the domain expertise and strategic direction.
+Skills are Markdown files — not code. Read them, adapt them, write new ones for your own workflows.
 
 ---
 
 ## Part of a larger system
 
-This is the first repository in a growing collection of agentic PPC infrastructure templates. Each repo covers a specific layer of the stack and is designed to work together.
+This repo is the foundation. More templates coming:
 
-More templates coming:
 - Search term classification pipeline
 - Budget optimization and forecasting
 - Automated reporting

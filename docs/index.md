@@ -24,6 +24,14 @@
 
 ---
 
+## Technical Reference
+
+| Document | Location | Use When |
+|----------|----------|---------|
+| Technical Patterns | `docs/technical-patterns.md` | SQL conventions, pipeline patterns, prompt structure |
+
+---
+
 ## Skills
 
 | Skill | Location | Use When |

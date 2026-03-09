@@ -1,9 +1,4 @@
 # Setup Context
 
-Status: not_initialized
-
----
-
-<!-- This file is written by your AI agent during the first session.
-     Do not edit manually — let the agent fill it in through the setup interview.
-     Once complete, Status will change to: initialized -->
+> Written by your agent during the first session after the setup interview.
+> If this file is empty, your agent will read `setup/SETUP.md` and run setup before doing anything else.
