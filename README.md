@@ -1,47 +1,44 @@
 # claude-code-ppc
 
-A personal assistant repository for building agentic PPC systems with an AI coding agent.
+Your personal assistant for PPC. A scratchpad where ideas come to life, get validated, and evolve into production systems.
 
 **Based on:** [Agentic Coding for PPC: Claude Code Setup](https://peterjonker.dev/posts/agentic-coding-ppc-claude-code/)
 
 ---
 
-## What is this?
+## The strategy
 
-This is a **personal assistant repo**: a single repository where you manage multiple PPC projects side by side. You prototype pipelines, run analyses, test ideas, and build out your data layer, all in one place with your AI coding agent.
+Everything starts in one place. You prototype pipelines, test analyses, iterate on prompts, and explore data, all in a single repository with your AI coding agent.
 
-When a project matures and needs scheduling, team access, or deployment, you extract it into its own dedicated repository with its own agent instructions, tests, and CI/CD. This repo is the lab. Production repos are the output.
+This is one half of a two-tier approach:
 
-**The architecture this is built around:**
-```
-Data warehouse (BigQuery or similar)
-    ↓
-Python pipelines — orchestration and logic
-    ↓
-LLM APIs — Gemini, Claude, OpenAI — for reasoning and classification
-    ↓
-Ad platform APIs — push changes back to Google Ads, Meta, etc.
-```
+1. **This repo (personal assistant):** Discovery, prototyping, quick iteration. Speed matters more than polish. Try ideas, validate them, move fast.
+2. **Dedicated repos (production):** When something needs scheduling, team access, CI/CD, or to run without your supervision, it graduates to its own repository with its own CLAUDE.md, tests, and deployment pipeline.
 
-Your agent manages the code. You provide the domain expertise and strategic direction.
-
-**Install Claude Code:** [docs.anthropic.com/en/docs/claude-code](https://docs.anthropic.com/en/docs/claude-code)
+The beauty is that Claude can read both repositories simultaneously. When you're prototyping here and need context from a production system you built earlier, the agent sees both.
 
 ---
 
-## The patterns that matter
+## Tools you'll use
 
-- **`CLAUDE.md`** — operating instructions your agent reads on every session. Keep it under 80 lines. Every line costs context.
-- **`docs/index.md`** — a navigation layer so the agent finds the right doc without loading everything at once.
-- **`projects/*/GOAL.md`** — one file per project describing what it is, current state, what's next. Prevents re-briefing every session.
-- **`roadmap/`** — priorities and backlog across all projects. Your agent reads this to understand what's active and what's next.
-- **Skills** — reusable routines in `.claude/skills/`. If you explain the same thing to your agent twice, write a skill for it.
+Your agent executes real tools, not just generates code. Here's what's available and why each matters.
 
-Clone it, strip out what doesn't apply, add what does.
+| Tool | What it does |
+|------|-------------|
+| **`bq`** | Query BigQuery directly. Zero context overhead vs MCP. Claude writes SQL, runs it, reads results, iterates. |
+| **`gcloud`** | Authentication, project switching, service account management. |
+| **`git`** | Version control, diffs, history. Skills like weekly-update read `git log` to generate progress reports. |
+| **`python` / `uv`** | Script execution, reproducible environments. `uv` handles packages with lock files. |
+| **`gh`** | GitHub CLI for PRs, issues, code review. Faster than the browser. |
+| **`ruff`** | Linting and formatting. Catches issues before they compound. |
+| **`mypy`** | Static type checking. Catches AI hallucinations in code before runtime. |
+| **`pytest`** | Unit tests, integration tests, BigQuery dry runs. |
+
+For details on each tool, plan mode, model routing, and the execute-validate-iterate loop, see `docs/tools.md`.
 
 ---
 
-## Quick start
+## Getting started
 
 ```bash
 git clone https://github.com/peterjonkerdev/claude-code-ppc.git
@@ -58,22 +55,26 @@ claude
 **Using a different agent?** (Cursor, Windsurf, Copilot, etc.)
 Point it at `CLAUDE.md` and say: *"Read this file and follow the initialization instructions before doing anything else."*
 
+**Install Claude Code:** [docs.anthropic.com/en/docs/claude-code](https://docs.anthropic.com/en/docs/claude-code)
+
 ---
 
-## What's in here
+## What's inside
 
 ```
-CLAUDE.md                    # Agent operating instructions — loaded every session
+CLAUDE.md                    # Agent operating instructions, loaded every session
 README.md                    # This file
 
 setup/
-  context.md                 # Your setup — filled in during the first session
-  SETUP.md                   # Setup interview — runs once on first session
+  context.md                 # Your setup, filled in during the first session
+  SETUP.md                   # Setup interview, runs once on first session
 
 docs/
-  index.md                   # Navigation layer — what docs exist and where
+  index.md                   # Navigation layer: what docs exist and where
+  tools.md                   # Tools, workflows, and how to use them
+  technical-patterns.md      # Patterns that emerge from your work
 
-bigquery/                    # Optional — only relevant if you use BigQuery
+bigquery/                    # Example: how to document data sources for the agent
   README.md                  # Decision tree: which table for which question
   schemas/
     google_ads_transfer.md   # Full reference for Google Ads Data Transfer tables
@@ -95,12 +96,12 @@ roadmap/
     repo-health/             # Audits the repo for missing docs and dead links
     visualize-flow/          # Generates Mermaid diagrams of data flows
     weekly-update/           # Weekly progress summary from git history
-    learning-opportunity/    # Teaching mode — explains concepts using your code
+    learning-opportunity/    # Teaching mode: explains concepts using your code
 
 .env.example                 # Environment variable template
 ```
 
-The BigQuery docs are the most opinionated part of this repo. If you're on a different stack — Snowflake, Redshift, Looker, spreadsheets — ignore that folder and build your own data layer docs using `bigquery/schemas/_template.md` as a starting point.
+The `bigquery/` folder is the most opinionated part. It's also a good example of how to document any data source so the agent can use it effectively. If you're on a different stack (Snowflake, Redshift, spreadsheets), use `bigquery/schemas/_template.md` as a starting point for your own data docs.
 
 ---
 
@@ -115,20 +116,20 @@ Reusable routines your agent follows on demand. Trigger them conversationally.
 | `weekly-update` | "give me a weekly update" | Progress summary from git history |
 | `learning-opportunity` | "explain this to me" | Explains any concept at three depth levels using your actual code |
 
-Skills are Markdown files — not code. Read them, adapt them, write new ones for your own workflows.
+Skills are Markdown files, not code. Read them, adapt them, write new ones for your own workflows.
 
 ---
 
-## From personal assistant to production
+## When something graduates
 
-This repo is your starting point. As projects mature, extract them into dedicated repos with:
+Signs a project is ready for its own repo:
 
-- Their own `CLAUDE.md` with system-specific instructions
-- Test suites and CI/CD pipelines
-- Dependency management (`uv.lock` for reproducibility)
-- Eval frameworks for AI pipeline accuracy
-- Pre-commit hooks (linting, type checking, tests)
+- It needs to run on a schedule without your supervision
+- Other people need access or will contribute
+- It needs CI/CD, deployment pipelines, or infrastructure
+- It has its own dependencies that shouldn't affect other projects
+- You're spending more time maintaining it than prototyping new things
 
-The same principles apply at every scale: persistent context, structured documentation, plan-first execution, and automated code quality checks. Only the scope changes.
+The graduation path: extract the project folder, give it its own `CLAUDE.md` with system-specific instructions, add tests, CI/CD, dependency management (`uv.lock`), and pre-commit hooks. The same principles apply at every scale. Only the scope changes.
 
 Follow [peterjonker.dev](https://peterjonker.dev) for updates.

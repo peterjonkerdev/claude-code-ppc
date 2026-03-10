@@ -10,6 +10,12 @@ Use this file to find the right documentation for any task. Read only what you n
 
 **Rule:** Always read the project `GOAL.md` before doing any work on that project.
 
+## Tools & Workflows
+
+| Document | Location | Use When |
+|----------|----------|---------|
+| Tools & Workflows | `docs/tools.md` | Understanding available CLI tools, plan mode, model routing, the execute-validate-iterate loop |
+
 ## BigQuery & Data
 
 | Document | Location | Use When |
@@ -30,7 +36,7 @@ Use this file to find the right documentation for any task. Read only what you n
 
 | Document | Location | Use When |
 |----------|----------|---------|
-| Technical Patterns | `docs/technical-patterns.md` | SQL conventions, pipeline patterns, prompt structure |
+| Technical Patterns | `docs/technical-patterns.md` | SQL conventions, pipeline patterns, prompt structure (grows over time) |
 
 ## Skills
 

@@ -1,7 +1,7 @@
 # Technical Patterns
 
-> Reusable patterns and conventions for this repo.
-> Add entries here as patterns emerge from the work — not upfront.
+> Patterns are added as they emerge from your work. Start empty, let it grow.
+> This file is a living reference. Don't try to fill it upfront.
 
 ---
 
