@@ -1,20 +1,16 @@
 # claude-code-ppc
 
-A starting point for building agentic PPC systems with an AI coding agent.
+A personal assistant repository for building agentic PPC systems with an AI coding agent.
 
 **Based on:** [Agentic Coding for PPC: Claude Code Setup](https://peterjonker.dev/posts/agentic-coding-ppc-claude-code/)
 
 ---
 
-## New to Claude Code?
+## What is this?
 
-Claude Code is a terminal-based AI coding agent. It reads your files, writes code, runs queries, and iterates — it doesn't just suggest snippets in a chat window. It's the difference between getting advice and having someone actually build the thing with you.
+This is a **personal assistant repo**: a single repository where you manage multiple PPC projects side by side. You prototype pipelines, run analyses, test ideas, and build out your data layer, all in one place with your AI coding agent.
 
-For PPC, that means:
-
-- Ask it to analyze your search term data and it writes the SQL, runs it against BigQuery, reads the output, and gives you the analysis
-- Tell it to build a classification pipeline and it writes the Python, tests it, fixes the errors, and validates the output
-- Ask for a weekly performance report and it queries your data, writes the narrative, and formats the output
+When a project matures and needs scheduling, team access, or deployment, you extract it into its own dedicated repository with its own agent instructions, tests, and CI/CD. This repo is the lab. Production repos are the output.
 
 **The architecture this is built around:**
 ```
@@ -33,13 +29,12 @@ Your agent manages the code. You provide the domain expertise and strategic dire
 
 ---
 
-## Already using Claude Code?
-
-Use this repo as inspiration. The patterns that matter:
+## The patterns that matter
 
 - **`CLAUDE.md`** — operating instructions your agent reads on every session. Keep it under 80 lines. Every line costs context.
-- **`docs/index.md`** — a navigation layer so the agent finds the right doc without loading everything at once
+- **`docs/index.md`** — a navigation layer so the agent finds the right doc without loading everything at once.
 - **`projects/*/GOAL.md`** — one file per project describing what it is, current state, what's next. Prevents re-briefing every session.
+- **`roadmap/`** — priorities and backlog across all projects. Your agent reads this to understand what's active and what's next.
 - **Skills** — reusable routines in `.claude/skills/`. If you explain the same thing to your agent twice, write a skill for it.
 
 Clone it, strip out what doesn't apply, add what does.
@@ -91,6 +86,10 @@ projects/
   _template/
     GOAL.md                  # Template for documenting a new project
 
+roadmap/
+  overview.md                # Current focus and active priorities
+  priorities.md              # Full backlog: active + upcoming per project
+
 .claude/
   skills/
     repo-health/             # Audits the repo for missing docs and dead links
@@ -120,13 +119,16 @@ Skills are Markdown files — not code. Read them, adapt them, write new ones fo
 
 ---
 
-## Part of a larger system
+## From personal assistant to production
 
-This repo is the foundation. More templates coming:
+This repo is your starting point. As projects mature, extract them into dedicated repos with:
 
-- Search term classification pipeline
-- Budget optimization and forecasting
-- Automated reporting
-- Ad copy automation
+- Their own `CLAUDE.md` with system-specific instructions
+- Test suites and CI/CD pipelines
+- Dependency management (`uv.lock` for reproducibility)
+- Eval frameworks for AI pipeline accuracy
+- Pre-commit hooks (linting, type checking, tests)
+
+The same principles apply at every scale: persistent context, structured documentation, plan-first execution, and automated code quality checks. Only the scope changes.
 
 Follow [peterjonker.dev](https://peterjonker.dev) for updates.
