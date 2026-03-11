@@ -141,8 +141,6 @@ roadmap → spec (what does "done" look like?) → plan → build → verify aga
 
 Not everything needs a spec. Bug fixes, config tweaks, and quick explorations don't. Specs help most when the definition of "done" is ambiguous: new pipelines, prompt changes, schema migrations, features heading to production.
 
-For more on this approach, see [Spec-Driven Development with AI](https://peterjonker.dev/posts/spec-driven-development-ai-coding/).
-
 ---
 
 _This file covers the tools referenced in the [blog post](https://peterjonker.dev/posts/agentic-coding-ppc-claude-code/). Add your own tools and workflows as your setup evolves._
