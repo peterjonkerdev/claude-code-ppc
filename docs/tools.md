@@ -129,6 +129,20 @@ No copy-pasting between tools. No switching to the BigQuery console. The agent h
 
 This extends to multi-step analysis. Claude can query one dataset to identify a problem, query a second to find the cause, query a third to validate the hypothesis, all autonomously within a single conversation turn.
 
+### Spec-driven development
+
+Plan mode is powerful but ephemeral: the conversation disappears when the session ends. For features that matter, write a lightweight spec before building. The spec captures what "done" looks like (expected output, acceptance criteria, verification steps) as a durable markdown file that outlives the session.
+
+Specs live in `specs/` using the template at `specs/TEMPLATE.md`. The workflow:
+
+```
+roadmap → spec (what does "done" look like?) → plan → build → verify against spec → commit
+```
+
+Not everything needs a spec. Bug fixes, config tweaks, and quick explorations don't. Specs help most when the definition of "done" is ambiguous: new pipelines, prompt changes, schema migrations, features heading to production.
+
+For more on this approach, see [Spec-Driven Development with AI](https://peterjonker.dev/posts/spec-driven-development-ai-coding/).
+
 ---
 
 _This file covers the tools referenced in the [blog post](https://peterjonker.dev/posts/agentic-coding-ppc-claude-code/). Add your own tools and workflows as your setup evolves._

@@ -55,3 +55,5 @@ After meaningful work, propose doc updates: what changed, what's outdated, what'
 - `SAFE_DIVIDE()` for all ratios
 
 **Pipelines:** Batching, error handling, logging. Keep it simple; don't abstract prematurely.
+
+**Specs:** For features heading to production, write a spec in `specs/` using the template. Define expected output, acceptance criteria, and verification method before building.

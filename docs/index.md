@@ -37,6 +37,7 @@ Use this file to find the right documentation for any task. Read only what you n
 | Document | Location | Use When |
 |----------|----------|---------|
 | Technical Patterns | `docs/technical-patterns.md` | SQL conventions, pipeline patterns, prompt structure (grows over time) |
+| Spec Template | `specs/TEMPLATE.md` | Writing a spec for a feature heading to production |
 
 ## Skills
 
