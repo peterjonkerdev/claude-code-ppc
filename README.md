@@ -61,9 +61,12 @@ Point it at `CLAUDE.md` and say: *"Read this file and follow the initialization 
 
 ## What's inside
 
+Every project is a self-contained mini-repo under `projects/`. It has its own `GOAL.md` (what + why + current state) and `tasks/todo.md` (active work + backlog). When it graduates to production, you copy the folder and add production scaffolding.
+
 ```
 CLAUDE.md                    # Agent operating instructions, loaded every session
 README.md                    # This file
+lessons.md                   # Rules from past corrections, grows over time
 
 setup/
   context.md                 # Your setup, filled in during the first session
@@ -74,6 +77,12 @@ docs/
   tools.md                   # Tools, workflows, and how to use them
   technical-patterns.md      # Patterns that emerge from your work
 
+projects/
+  _template/
+    GOAL.md                  # Template for documenting a new project
+    tasks/
+      todo.md                # Template for project task tracking
+
 bigquery/                    # Example: how to document data sources for the agent
   README.md                  # Decision tree: which table for which question
   schemas/
@@ -83,17 +92,8 @@ bigquery/                    # Example: how to document data sources for the age
     calculated-metrics.md    # CAC, LTV:CAC, ROAS and other metric formulas
     channel-breakdown.md     # Channel and subchannel taxonomy template
 
-projects/
-  _template/
-    GOAL.md                  # Template for documenting a new project
-
-roadmap/
-  overview.md                # Current focus and active priorities
-  priorities.md              # Full backlog: active + upcoming per project
-
-tasks/
-  todo.md                    # Active work items, tracked as checkable items
-  lessons.md                 # Rules from past corrections, grows over time
+specs/
+  TEMPLATE.md                # Template for production feature specs
 
 .claude/
   skills/

@@ -10,32 +10,28 @@ Read `setup/context.md`. If it's empty, read `setup/SETUP.md` and run the setup 
 
 ---
 
-## How to Assist
+## Before Starting Work
 
-This is a discovery repo. Bias toward trying things quickly over planning extensively. Save thorough planning for production repos.
+1. Read the project's `GOAL.md` — what it does, current state, key references
+2. Read the project's `tasks/todo.md` — what's active, what's blocked
+3. For data questions, start with the relevant schema doc in `bigquery/`
+4. For cross-project navigation: `docs/index.md`
 
-### Step 1: Understand intent
+## After Completing Work
 
-Read the request. Is it exploration or a structured build?
+1. Update the project's `tasks/todo.md` — mark done, add new items
+2. Update `GOAL.md` current state — if status fundamentally changed
+3. Update `README.md` project table — only if status changed
+
+Skip if nothing structural changed.
+
+## How to Work
+
 - **Exploration** (data questions, quick analysis, testing ideas) → just do it, iterate fast
 - **Structured build** (multi-file pipeline, complex system) → suggest plan mode and `/model opus`
 - **Execution** (SQL, scripting, running queries) → Sonnet or Haiku is fine
 
-### Step 2: Find relevant docs
-
-Read `docs/index.md` first. Only load what's needed for the current task.
-- Always read a project's `GOAL.md` before working on it
-- For data questions, start with the relevant schema doc
-- Re-check `docs/index.md` when the topic shifts
-
-### Step 3: Execute and iterate
-
-For exploration: run the query, show results, suggest next steps. Keep the loop tight.
-For builds: present a quick plan, get confirmation, then execute autonomously. Include a validation step: "how will we know this worked?" Only pause if something unexpected changes direction.
-
-### Step 4: Keep docs current
-
-After meaningful work, propose doc updates: what changed, what's outdated, what's new.
+For builds: present a quick plan with validation criteria, get confirmation, then execute autonomously.
 
 ---
 
@@ -45,7 +41,9 @@ After meaningful work, propose doc updates: what changed, what's outdated, what'
 
 **Verify before done:** Never mark a step complete without showing the result: sample output, row counts, or a test command.
 
-**Thoughtful speed:** Move fast on exploration. For builds that might graduate to production, write them well the first time: clear names, error handling, type hints. Refactoring a messy prototype costs more than getting it right upfront.
+**Thoughtful speed:** Move fast on exploration. For builds that might graduate to production, write them well the first time: clear names, error handling, type hints.
+
+**No bloat:** Don't create files or folders outside of `projects/<name>/` without discussing it first. If something doesn't fit an existing project, ask whether it needs a new one.
 
 **Prompts:** All LLM prompts live as `.md` files in the project's `prompts/` folder. Never hardcode them in scripts.
 
@@ -62,15 +60,10 @@ After meaningful work, propose doc updates: what changed, what's outdated, what'
 
 ## Working Style
 
-### Subagent Strategy
-Use subagents for parallel, independent tasks: reading multiple docs, exploring approaches, running queries while writing code. One task per subagent. Keep the main thread for orchestration and decisions.
+**Subagents:** Use for parallel, independent tasks. One task per subagent. Main thread for orchestration.
 
-### Autonomous Bug Fixing
-Hit a bug? Fix it. Explain what broke and what you changed, then keep moving. Only pause if the fix changes the scope of the original task.
+**Bug fixing:** Fix it, explain what broke, keep moving. Only pause if the fix changes scope.
 
-### Demand Elegance
-For non-trivial changes, pause: "Is there a more elegant way?" Consider readability, reuse, and whether it'll make sense in a month. Don't over-engineer, but don't settle for the first thing that works.
+**Elegance:** For non-trivial changes, pause: "Is there a more elegant way?" Don't over-engineer, but don't settle for the first thing that works.
 
-### Task Tracking
-Active work in `tasks/todo.md`. For multi-step work, plan as checkable items before executing.
-After corrections, capture the lesson in `tasks/lessons.md` with date + context + rule.
+**Task tracking:** Active work in each project's `tasks/todo.md`. Multi-step work as checkable items. After corrections, capture the lesson in `lessons.md`.

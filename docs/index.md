@@ -4,11 +4,13 @@ Use this file to find the right documentation for any task. Read only what you n
 
 ## Projects
 
-| Project | Goal File | Overview |
-|---------|-----------|---------|
-| _(add your first project here)_ | `projects/your-project/GOAL.md` | _(description)_ |
+| Project | Goal File | Status |
+|---------|-----------|--------|
+| _(add your first project here)_ | `projects/your-project/GOAL.md` | _(status)_ |
 
-**Rule:** Always read the project `GOAL.md` before doing any work on that project.
+Always read the project `GOAL.md` before any work.
+For project priorities: `projects/<name>/tasks/todo.md`.
+For the portfolio view: `README.md`.
 
 ## Tools & Workflows
 
@@ -25,13 +27,6 @@ Use this file to find the right documentation for any task. Read only what you n
 | Calculated Metrics | `bigquery/metrics/calculated-metrics.md` | CAC, LTV:CAC, ROAS: exact formulas |
 | Channel Taxonomy | `bigquery/metrics/channel-breakdown.md` | Channel / subchannel / stage definitions |
 
-## Roadmap & Planning
-
-| Document | Location | Use When |
-|----------|----------|---------|
-| Priorities & Backlog | `roadmap/priorities.md` | Full picture: active + backlog per project |
-| Overview | `roadmap/overview.md` | Understanding current focus |
-
 ## Technical Reference
 
 | Document | Location | Use When |
@@ -47,13 +42,6 @@ Use this file to find the right documentation for any task. Read only what you n
 | Visualize Flow | `.claude/skills/visualize-flow/SKILL.md` | Diagrams or data flow charts for any project |
 | Weekly Update | `.claude/skills/weekly-update/SKILL.md` | Generating weekly status updates from git history |
 | Learning Opportunity | `.claude/skills/learning-opportunity/SKILL.md` | Understanding a concept or piece of code in depth |
-
-## Task Management
-
-| Document | Location | Use When |
-|----------|----------|---------|
-| Active Tasks | `tasks/todo.md` | Planning multi-step work, checking progress |
-| Lessons Learned | `tasks/lessons.md` | After corrections, to capture rules |
 
 ---
 
