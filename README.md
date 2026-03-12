@@ -12,7 +12,7 @@ Everything starts in one place. You prototype pipelines, test analyses, iterate 
 
 This is one half of a two-tier approach:
 
-1. **This repo (personal assistant):** Discovery, prototyping, quick iteration. Speed matters more than polish. Try ideas, validate them, move fast.
+1. **This repo (personal assistant):** Discovery, prototyping, quick iteration. Move fast, but write code you'd be comfortable graduating. Try ideas, validate them, iterate.
 2. **Dedicated repos (production):** When something needs scheduling, team access, CI/CD, or to run without your supervision, it graduates to its own repository with its own CLAUDE.md, tests, and deployment pipeline.
 
 The beauty is that Claude can read both repositories simultaneously. When you're prototyping here and need context from a production system you built earlier, the agent sees both.
@@ -90,6 +90,10 @@ projects/
 roadmap/
   overview.md                # Current focus and active priorities
   priorities.md              # Full backlog: active + upcoming per project
+
+tasks/
+  todo.md                    # Active work items, tracked as checkable items
+  lessons.md                 # Rules from past corrections, grows over time
 
 .claude/
   skills/

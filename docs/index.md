@@ -48,6 +48,13 @@ Use this file to find the right documentation for any task. Read only what you n
 | Weekly Update | `.claude/skills/weekly-update/SKILL.md` | Generating weekly status updates from git history |
 | Learning Opportunity | `.claude/skills/learning-opportunity/SKILL.md` | Understanding a concept or piece of code in depth |
 
+## Task Management
+
+| Document | Location | Use When |
+|----------|----------|---------|
+| Active Tasks | `tasks/todo.md` | Planning multi-step work, checking progress |
+| Lessons Learned | `tasks/lessons.md` | After corrections, to capture rules |
+
 ---
 
 _This index is updated by the agent after each session where new documentation is added._
