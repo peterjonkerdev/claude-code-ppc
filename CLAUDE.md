@@ -54,8 +54,6 @@ For builds: present a quick plan with validation criteria, get confirmation, the
 
 **Pipelines:** Batching, error handling, logging. Keep it simple; don't abstract prematurely. For anything heading to production: write end-to-end tests with known input/output, then iterate until they pass.
 
-**Specs:** For features heading to production, write a spec in `specs/` using the template. Define expected output, acceptance criteria, and verification method before building.
-
 ---
 
 ## Working Style
@@ -66,4 +64,4 @@ For builds: present a quick plan with validation criteria, get confirmation, the
 
 **Elegance:** For non-trivial changes, pause: "Is there a more elegant way?" Don't over-engineer, but don't settle for the first thing that works.
 
-**Task tracking:** Active work in each project's `tasks/todo.md`. Multi-step work as checkable items. After corrections, capture the lesson in `lessons.md`.
+**Task tracking:** Active work in each project's `tasks/todo.md`. Multi-step work as checkable items.
