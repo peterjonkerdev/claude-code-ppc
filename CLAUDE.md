@@ -6,7 +6,7 @@
 
 ## First session
 
-Read `setup/context.md`. If it's empty, read `setup/SETUP.md` and run the setup interview before doing anything else. Once setup is complete, come back here and proceed normally.
+Read `setup/context.md`. If it contains only the template header and HTML comments (no actual user content below them), read `setup/SETUP.md` and run the full setup interview before doing anything else. This is non-negotiable: do not skip sections or rush through it. Once setup is complete, come back here and proceed normally.
 
 ---
 
@@ -37,11 +37,11 @@ For builds: present a quick plan with validation criteria, get confirmation, the
 
 ## Rules
 
-**Self-improvement:** After any correction, propose a concrete edit to CLAUDE.md or the relevant doc that prevents the same mistake recurring.
+**Self-improvement:** After any correction, propose a concrete edit to CLAUDE.md or the relevant doc. Capture recurring lessons in `lessons.md` with date + what happened + rule to prevent recurrence.
 
 **Verify before done:** Never mark a step complete without showing the result: sample output, row counts, or a test command.
 
-**Thoughtful speed:** Move fast on exploration. For builds that might graduate to production, write them well the first time: clear names, error handling, type hints.
+**Thoughtful speed:** Move fast on exploration. For builds that might graduate to production, write them well the first time: clear names, error handling, type hints. When a project is ready to graduate, follow `docs/graduation-guide.md`.
 
 **No bloat:** Don't create files or folders outside of `projects/<name>/` without discussing it first. If something doesn't fit an existing project, ask whether it needs a new one.
 
@@ -51,6 +51,7 @@ For builds: present a quick plan with validation criteria, get confirmation, the
 - `p_ads_*` tables + `segments_date` for date-range queries
 - `ads_*` views + `_DATA_DATE = _LATEST_DATE` for current state
 - `SAFE_DIVIDE()` for all ratios
+- Staging-to-production pattern: INSERT into a staging table, then MERGE into the production table with `COALESCE(staging, production)` for upserts
 
 **Pipelines:** Batching, error handling, logging. Keep it simple; don't abstract prematurely. For anything heading to production: write end-to-end tests with known input/output, then iterate until they pass.
 

@@ -71,3 +71,16 @@ How will we know this works?
 ## Notes
 
 _(Anything else the agent should know before working on this project: constraints, decisions made, things to avoid, context that isn't obvious from the code.)_
+
+---
+
+## Graduation Criteria
+
+When this project is ready for its own production repo, check these boxes:
+
+- [ ] Needs to run on a schedule
+- [ ] Other people need access or will contribute
+- [ ] Needs CI/CD or deployment pipelines
+- [ ] Has its own dependencies that shouldn't affect other projects
+
+If two or more are checked, follow `docs/graduation-guide.md` and use `production-template/` as the scaffold.

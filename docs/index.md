@@ -17,6 +17,7 @@ For the portfolio view: `README.md`.
 | Document | Location | Use When |
 |----------|----------|---------|
 | Tools & Workflows | `docs/tools.md` | Understanding available CLI tools, plan mode, model routing, the execute-validate-iterate loop |
+| Graduation Guide | `docs/graduation-guide.md` | Moving a project from prototype to production |
 
 ## BigQuery & Data
 
@@ -31,7 +32,15 @@ For the portfolio view: `README.md`.
 
 | Document | Location | Use When |
 |----------|----------|---------|
-| Technical Patterns | `docs/technical-patterns.md` | SQL conventions, pipeline patterns, prompt structure (grows over time) |
+| Technical Patterns | `docs/technical-patterns.md` | SQL conventions, pipeline patterns, prompt structure, testing, Google Ads API |
+| Lessons | `lessons.md` | Past corrections and rules to prevent recurrence |
+
+## Production
+
+| Document | Location | Use When |
+|----------|----------|---------|
+| Production Template | `production-template/README.md` | Scaffolding a new production repo |
+| Production CLAUDE.md | `production-template/CLAUDE.md` | Agent protocol template for production systems |
 
 ## Skills
 
@@ -41,6 +50,14 @@ For the portfolio view: `README.md`.
 | Visualize Flow | `.claude/skills/visualize-flow/SKILL.md` | Diagrams or data flow charts for any project |
 | Weekly Update | `.claude/skills/weekly-update/SKILL.md` | Generating weekly status updates from git history |
 | Learning Opportunity | `.claude/skills/learning-opportunity/SKILL.md` | Understanding a concept or piece of code in depth |
+| Eval Report | `.claude/skills/eval-report/SKILL.md` | Running evals, checking accuracy, comparing prompt versions |
+| Schema Validator | `.claude/skills/schema-validator/SKILL.md` | Validating BigQuery schemas against actual tables |
+
+## Learning
+
+| Document | Location | Use When |
+|----------|----------|---------|
+| Learning directory | `learning/` | Concept explanations saved by the learning-opportunity skill |
 
 ---
 

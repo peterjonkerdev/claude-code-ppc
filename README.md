@@ -13,7 +13,7 @@ Everything starts in one place. You prototype pipelines, test analyses, iterate 
 This is one half of a two-tier approach:
 
 1. **This repo (personal assistant):** Discovery, prototyping, quick iteration. Move fast, but write code you'd be comfortable graduating. Try ideas, validate them, iterate.
-2. **Dedicated repos (production):** When something needs scheduling, team access, CI/CD, or to run without your supervision, it graduates to its own repository with its own CLAUDE.md, tests, and deployment pipeline.
+2. **Dedicated repos (production):** When something needs scheduling, team access, CI/CD, or to run without your supervision, it graduates to its own repository with its own CLAUDE.md, tests, and deployment pipeline. See `docs/graduation-guide.md` and `production-template/`.
 
 The beauty is that Claude can read both repositories simultaneously. When you're prototyping here and need context from a production system you built earlier, the agent sees both.
 
@@ -61,7 +61,7 @@ Point it at `CLAUDE.md` and say: *"Read this file and follow the initialization 
 
 ## What's inside
 
-Every project is a self-contained mini-repo under `projects/`. It has its own `GOAL.md` (what + why + current state) and `tasks/todo.md` (active work + backlog). When it graduates to production, you copy the folder and add production scaffolding.
+Every project is a self-contained mini-repo under `projects/`. It has its own `GOAL.md` (what + why + current state) and `tasks/todo.md` (active work + backlog). When it graduates to production, follow `docs/graduation-guide.md`.
 
 ```
 CLAUDE.md                    # Agent operating instructions, loaded every session
@@ -76,12 +76,21 @@ docs/
   index.md                   # Navigation layer: what docs exist and where
   tools.md                   # Tools, workflows, and how to use them
   technical-patterns.md      # Patterns that emerge from your work
+  graduation-guide.md        # How to move a project to production
 
 projects/
   _template/
     GOAL.md                  # Template for documenting a new project
     tasks/
       todo.md                # Template for project task tracking
+  _archive/                  # Graduated or retired projects
+
+production-template/         # Scaffold for new production repos
+  CLAUDE.md                  # Production agent protocol
+  Makefile                   # test, lint, format, typecheck targets
+  pyproject.toml             # Project config with ruff/mypy/pytest
+  .pre-commit-config.yaml    # Pre-commit hooks
+  ...                        # See production-template/README.md for full contents
 
 bigquery/                    # Example: how to document data sources for the agent
   README.md                  # Decision tree: which table for which question
@@ -92,8 +101,7 @@ bigquery/                    # Example: how to document data sources for the age
     calculated-metrics.md    # CAC, LTV:CAC, ROAS and other metric formulas
     channel-breakdown.md     # Channel and subchannel taxonomy template
 
-specs/
-  TEMPLATE.md                # Template for production feature specs
+learning/                    # Concept explanations saved by the learning-opportunity skill
 
 .claude/
   skills/
@@ -101,6 +109,8 @@ specs/
     visualize-flow/          # Generates Mermaid diagrams of data flows
     weekly-update/           # Weekly progress summary from git history
     learning-opportunity/    # Teaching mode: explains concepts using your code
+    eval-report/             # Run evals and check prompt accuracy
+    schema-validator/        # Validate BigQuery schemas against docs
 
 .env.example                 # Environment variable template
 ```
@@ -119,6 +129,8 @@ Reusable routines your agent follows on demand. Trigger them conversationally.
 | `visualize-flow` | "visualize the X flow" | Mermaid architecture diagram for any pipeline |
 | `weekly-update` | "give me a weekly update" | Progress summary from git history |
 | `learning-opportunity` | "explain this to me" | Explains any concept at three depth levels using your actual code |
+| `eval-report` | "run evals" | Runs eval pipeline, reports per-category accuracy, flags regressions |
+| `schema-validator` | "validate schemas" | Compares documented BigQuery schemas against actual tables, flags mismatches |
 
 Skills are Markdown files, not code. Read them, adapt them, write new ones for your own workflows.
 
@@ -134,6 +146,4 @@ Signs a project is ready for its own repo:
 - It has its own dependencies that shouldn't affect other projects
 - You're spending more time maintaining it than prototyping new things
 
-The graduation path: extract the project folder, give it its own `CLAUDE.md` with system-specific instructions, add tests, CI/CD, dependency management (`uv.lock`), and pre-commit hooks. The same principles apply at every scale. Only the scope changes.
-
-Follow [peterjonker.dev](https://peterjonker.dev) for updates.
+The graduation path is documented in `docs/graduation-guide.md`. Use `production-template/` as the scaffold for the new repo. Archive the project folder in `projects/_archive/` and keep any shared BigQuery docs here.

@@ -1,245 +1,152 @@
-# Google Ads Data Transfer — Schema Reference
+# Google Ads Data Transfer
 
-The Google Ads Data Transfer gives you the most granular Google Ads data available in a queryable format. Daily snapshots of every entity in your account, pushed to BigQuery automatically.
+The [Google Ads Data Transfer](https://cloud.google.com/bigquery/docs/google-ads-transfer) pushes daily snapshots of your entire Google Ads account to BigQuery. Entity dimensions, performance stats, bid strategy settings, search terms, shopping products, all of it.
 
 **Dataset location:** `your-project.your-dataset` _(update during setup)_
 
+### Other BigQuery Data Transfers
+
+Google Ads is the most common starting point, but the [BigQuery Data Transfer Service](https://cloud.google.com/bigquery/docs/transfer-service-overview) supports other platforms natively:
+
+| Source | Transfer type | What you get |
+|--------|--------------|-------------|
+| **Display & Video 360** | Native Data Transfer | Impression, click, conversion, and reach data across programmatic buys |
+| **Campaign Manager 360** | Native Data Transfer | Cross-channel attribution, Floodlight conversions, rich media events |
+| **Search Ads 360** | Native Data Transfer | Cross-engine search management data (Google, Microsoft, Yahoo) |
+| **Google Analytics 4** | Native BigQuery export | Event-level data, user properties, session data, ecommerce events |
+| **YouTube** | Via DV360 transfer | Video ad performance (or YouTube Content Owner transfer for creators) |
+
+For platforms without a native transfer (Meta, Microsoft Ads, TikTok, LinkedIn, Amazon Ads), use a connector tool like Fivetran, Supermetrics, Funnel, or Stitch, or build your own ingestion via the platform's API. The same documentation pattern applies: point Claude at the dataset, let it discover the schema, document tables you use frequently.
+
 ---
 
-## Table Naming Convention
+## How to use this
 
-Every entity has two table variants:
+You don't need to memorize table schemas. Claude discovers them on demand via `INFORMATION_SCHEMA`. What you do need are the rules and gotchas that aren't obvious from the schema alone.
 
-| Pattern | Type | Use for |
-|---------|------|---------|
-| `ads_EntityName_XXXXXXXXXX` | View — latest snapshot only | Dimension lookups, current state |
-| `p_ads_EntityName_XXXXXXXXXX` | Partitioned table — full history | Date-range analysis, trend queries |
+When you find yourself querying a table repeatedly, document it using `bigquery/schemas/_template.md` with the business context that INFORMATION_SCHEMA can't tell you (what micros means, which filters to apply by default, common join patterns).
+
+---
+
+## Critical Rules
+
+### Two table types per entity
+
+| Pattern | Type | Use for | Required filter |
+|---------|------|---------|-----------------|
+| `ads_EntityName_XXXXXXXXXX` | View, latest snapshot only | Dimension lookups, current state | `WHERE _DATA_DATE = _LATEST_DATE` |
+| `p_ads_EntityName_XXXXXXXXXX` | Partitioned table, full history | Date-range analysis, trends | `WHERE segments_date BETWEEN ... AND ...` |
 
 The `XXXXXXXXXX` suffix is your Google Ads customer ID (digits only, no dashes).
 
----
+**Never use `ads_*` views for stats over a date range.** They only contain the latest day.
 
-## Entity Tables (Dimension Data)
+### Cost and bid fields are in micros
 
-Use these with `WHERE _DATA_DATE = _LATEST_DATE` for current state.
+All monetary fields (cost, CPC bids, CPA targets, budgets) are stored as micros. Always divide by 1,000,000:
 
-### Campaign
 ```sql
-SELECT
-  campaign_id,
-  campaign_name,
-  campaign_status,                                              -- ENABLED, PAUSED, REMOVED
-  campaign_advertising_channel_type,                           -- SEARCH, SHOPPING, DISPLAY, VIDEO
-  campaign_bidding_strategy_type,                              -- TARGET_ROAS, TARGET_CPA, MAXIMIZE_CONVERSIONS, etc.
-  campaign_maximize_conversion_value_target_roas,              -- tROAS target (as a ratio, e.g. 4.0 = 400%)
-  campaign_target_cpa_target_cpa_micros / 1000000 AS target_cpa,
-  campaign_budget_amount_micros / 1000000 AS daily_budget
-FROM `your-project.your-dataset.ads_Campaign_XXXXXXXXXX`
-WHERE _DATA_DATE = _LATEST_DATE
+metrics_cost_micros / 1000000 AS cost
+campaign_budget_amount_micros / 1000000 AS daily_budget
 ```
 
-Key fields:
-- `campaign_maximize_conversion_value_target_roas` — tROAS target for Smart Bidding campaigns
-- `campaign_target_cpa_target_cpa_micros` — tCPA in micros, divide by 1,000,000 for real value
-- Cost fields are in micros — always divide by 1,000,000
+### Ratios
 
-### AdGroup
+Always use `SAFE_DIVIDE()` and aggregate before dividing:
+
 ```sql
-SELECT
-  ad_group_id,
-  ad_group_name,
-  ad_group_status,
-  campaign_id,
-  ad_group_cpc_bid_micros / 1000000 AS max_cpc
-FROM `your-project.your-dataset.ads_AdGroup_XXXXXXXXXX`
-WHERE _DATA_DATE = _LATEST_DATE
+-- Correct
+SAFE_DIVIDE(SUM(metrics_cost_micros), SUM(metrics_clicks)) / 1000000 AS avg_cpc
+
+-- Wrong: averaging pre-calculated ratios skews toward low-volume days
+AVG(SAFE_DIVIDE(metrics_cost_micros, metrics_clicks)) / 1000000 AS avg_cpc
 ```
 
-### Keyword
-```sql
-SELECT
-  criterion_id,
-  ad_group_criterion_keyword_text,
-  ad_group_criterion_keyword_match_type,  -- BROAD, PHRASE, EXACT
-  ad_group_criterion_status,
-  ad_group_id,
-  campaign_id
-FROM `your-project.your-dataset.ads_Keyword_XXXXXXXXXX`
-WHERE _DATA_DATE = _LATEST_DATE
-```
+### Data freshness
 
-### Ad (RSA)
-```sql
-SELECT
-  ad_id,
-  ad_name,
-  ad_type,
-  ad_final_urls,
-  ad_strength,
-  ad_group_id,
-  campaign_id
-FROM `your-project.your-dataset.ads_Ad_XXXXXXXXXX`
-WHERE _DATA_DATE = _LATEST_DATE
-```
+The Data Transfer runs once per day, usually overnight. Today's data isn't available until tomorrow.
 
 ---
 
-## Stats Tables (Performance Metrics)
+## Schema Discovery
 
-Use `p_ads_*` tables with `segments_date` for any date-range query.
-
-### CampaignBasicStats
-Impressions, clicks, cost at campaign level.
+Point Claude at your dataset and it discovers everything:
 
 ```sql
-SELECT
-  campaign_id,
-  segments_date,
-  metrics_impressions,
-  metrics_clicks,
-  metrics_cost_micros / 1000000 AS cost,
-  SAFE_DIVIDE(metrics_cost_micros, metrics_clicks) / 1000000 AS avg_cpc,
-  SAFE_DIVIDE(metrics_clicks, metrics_impressions) AS ctr
-FROM `your-project.your-dataset.p_ads_CampaignBasicStats_XXXXXXXXXX`
-WHERE segments_date BETWEEN DATE_SUB(CURRENT_DATE(), INTERVAL 30 DAY) AND CURRENT_DATE()
+-- List all tables in the Data Transfer dataset
+SELECT table_name, table_type
+FROM `your-project.your-dataset.INFORMATION_SCHEMA.TABLES`
+ORDER BY table_name;
+
+-- Inspect columns for a specific table
+SELECT column_name, data_type, description
+FROM `your-project.your-dataset.INFORMATION_SCHEMA.COLUMNS`
+WHERE table_name = 'p_ads_CampaignBasicStats_XXXXXXXXXX'
+ORDER BY ordinal_position;
+
+-- Check available date ranges
+SELECT MIN(segments_date) AS earliest, MAX(segments_date) AS latest
+FROM `your-project.your-dataset.p_ads_CampaignBasicStats_XXXXXXXXXX`;
 ```
 
-### CampaignConversionStats
-Conversions and conversion value at campaign level.
-
-```sql
-SELECT
-  campaign_id,
-  segments_date,
-  metrics_conversions,
-  metrics_conversions_value,
-  metrics_cost_micros / 1000000 AS cost,
-  SAFE_DIVIDE(metrics_conversions_value, metrics_cost_micros / 1000000) AS roas,
-  SAFE_DIVIDE(metrics_cost_micros / 1000000, metrics_conversions) AS cpa
-FROM `your-project.your-dataset.p_ads_CampaignConversionStats_XXXXXXXXXX`
-WHERE segments_date BETWEEN DATE_SUB(CURRENT_DATE(), INTERVAL 30 DAY) AND CURRENT_DATE()
-```
-
-### SearchQueryStats
-Search term report — raw queries that triggered your ads.
-
-```sql
-SELECT
-  search_term_view_search_term,
-  campaign_id,
-  ad_group_id,
-  SUM(metrics_cost_micros) / 1000000 AS cost,
-  SUM(metrics_clicks) AS clicks,
-  SUM(metrics_impressions) AS impressions,
-  SUM(metrics_conversions) AS conversions,
-  SAFE_DIVIDE(SUM(metrics_conversions), SUM(metrics_clicks)) AS cvr
-FROM `your-project.your-dataset.p_ads_SearchQueryStats_XXXXXXXXXX`
-WHERE segments_date BETWEEN DATE_SUB(CURRENT_DATE(), INTERVAL 90 DAY) AND CURRENT_DATE()
-GROUP BY 1, 2, 3
-ORDER BY cost DESC
-```
-
-### KeywordBasicStats / KeywordConversionStats
-Performance at keyword level. Same structure as campaign stats but at `criterion_id` granularity.
-
-### AdGroupBasicStats / AdGroupConversionStats
-Performance at ad group level.
-
-### LandingPageStats
-Performance by landing page URL, broken out per campaign.
-
-```sql
-SELECT
-  expanded_landing_page_view_expanded_final_url AS landing_page,
-  campaign_id,
-  SUM(metrics_impressions) AS impressions,
-  SUM(metrics_clicks) AS clicks,
-  SUM(metrics_cost_micros) / 1000000 AS cost
-FROM `your-project.your-dataset.p_ads_LandingPageStats_XXXXXXXXXX`
-WHERE segments_date BETWEEN DATE_SUB(CURRENT_DATE(), INTERVAL 30 DAY) AND CURRENT_DATE()
-GROUP BY 1, 2
-ORDER BY cost DESC
-```
-
-### ShoppingProductStats
-Product-level performance for Shopping campaigns. Join with your product catalog for margin-aware analysis.
-
-```sql
-SELECT
-  segments_product_item_id AS product_id,
-  segments_product_title AS product_title,
-  campaign_id,
-  SUM(metrics_impressions) AS impressions,
-  SUM(metrics_clicks) AS clicks,
-  SUM(metrics_cost_micros) / 1000000 AS cost,
-  SUM(metrics_conversions) AS conversions,
-  SUM(metrics_conversions_value) AS revenue
-FROM `your-project.your-dataset.p_ads_ShoppingProductStats_XXXXXXXXXX`
-WHERE segments_date BETWEEN DATE_SUB(CURRENT_DATE(), INTERVAL 30 DAY) AND CURRENT_DATE()
-GROUP BY 1, 2, 3
-ORDER BY cost DESC
-```
+When you document a frequently-used table, use `bigquery/schemas/_template.md` and add it to the Custom Table Index in `bigquery/README.md`.
 
 ---
 
-## Common Patterns
+## Available Tables Reference
 
-### Track tROAS changes over time
-```sql
-WITH daily_settings AS (
-  SELECT
-    campaign_id, campaign_name,
-    DATE(_PARTITIONTIME) AS snapshot_date,
-    campaign_maximize_conversion_value_target_roas AS target_roas
-  FROM `your-project.your-dataset.p_ads_Campaign_XXXXXXXXXX`
-  WHERE _PARTITIONTIME >= TIMESTAMP(DATE_SUB(CURRENT_DATE(), INTERVAL 90 DAY))
-    AND campaign_maximize_conversion_value_target_roas IS NOT NULL
-    AND campaign_maximize_conversion_value_target_roas > 0
-),
-with_previous AS (
-  SELECT *,
-    LAG(target_roas) OVER (PARTITION BY campaign_id ORDER BY snapshot_date) AS prev_roas
-  FROM daily_settings
-)
-SELECT
-  campaign_name, snapshot_date,
-  prev_roas AS old_troas,
-  target_roas AS new_troas,
-  ROUND(target_roas - prev_roas, 2) AS change
-FROM with_previous
-WHERE prev_roas IS NOT NULL AND target_roas != prev_roas
-ORDER BY snapshot_date DESC
-```
+All tables below exist in both `ads_*` (latest view) and `p_ads_*` (partitioned history) variants.
 
-### Multi-level join (Campaign → Ad Group → Stats)
-```sql
-SELECT
-  c.campaign_name,
-  ag.ad_group_name,
-  SUM(s.metrics_impressions) AS impressions,
-  SUM(s.metrics_clicks) AS clicks,
-  SUM(s.metrics_cost_micros) / 1000000 AS cost
-FROM `your-project.your-dataset.p_ads_AdGroupBasicStats_XXXXXXXXXX` s
-LEFT JOIN (
-  SELECT ad_group_id, campaign_id, customer_id, ad_group_name
-  FROM `your-project.your-dataset.ads_AdGroup_XXXXXXXXXX`
-  WHERE _DATA_DATE = _LATEST_DATE
-) ag USING (ad_group_id, campaign_id, customer_id)
-LEFT JOIN (
-  SELECT campaign_id, customer_id, campaign_name
-  FROM `your-project.your-dataset.ads_Campaign_XXXXXXXXXX`
-  WHERE _DATA_DATE = _LATEST_DATE
-) c USING (campaign_id, customer_id)
-WHERE s.segments_date BETWEEN DATE_SUB(CURRENT_DATE(), INTERVAL 30 DAY) AND CURRENT_DATE()
-GROUP BY 1, 2
-ORDER BY cost DESC
-```
+### Entity Tables (Dimension Data)
+
+| Table | What it contains |
+|-------|-----------------|
+| `Campaign` | Name, status, channel type, bidding strategy, tROAS/tCPA targets, daily budget |
+| `AdGroup` | Name, status, CPC bid, campaign association |
+| `Keyword` | Text, match type, status, bid, quality score |
+| `Ad` | Type, final URLs, RSA headlines/descriptions, ad strength |
+| `BidGoal` | Portfolio bid strategy settings and targets |
+| `AdGroupAudience` | Audience targeting at ad group level |
+| `CampaignCriterion` | Campaign-level targeting criteria (locations, languages, etc.) |
+| `NegativeKeyword` | Negative keyword lists and associations |
+
+### Stats Tables (Performance Metrics)
+
+| Table | What it contains |
+|-------|-----------------|
+| `CampaignBasicStats` | Impressions, clicks, cost at campaign level |
+| `CampaignConversionStats` | Conversions, conversion value, ROAS at campaign level |
+| `AdGroupBasicStats` | Impressions, clicks, cost at ad group level |
+| `AdGroupConversionStats` | Conversions, conversion value at ad group level |
+| `KeywordBasicStats` | Impressions, clicks, cost at keyword level |
+| `KeywordConversionStats` | Conversions, conversion value at keyword level |
+| `SearchQueryStats` | Search term performance (the raw search query report) |
+| `LandingPageStats` | Performance by landing page URL per campaign |
+| `ShoppingProductStats` | Product-level performance for Shopping campaigns |
+| `ProductGroupStats` | Performance by product group subdivision |
+| `BidGoalStats` | Bid strategy performance metrics |
+| `AdBasicStats` | Impressions, clicks, cost at ad level |
+
+### Less Common But Useful
+
+| Table | What it contains |
+|-------|-----------------|
+| `GeoStats` | Performance by geographic location |
+| `PlacementStats` | Performance by Display/Video placement |
+| `AgeRangeStats` | Performance by age demographic |
+| `GenderStats` | Performance by gender demographic |
+| `ParentalStatusStats` | Performance by parental status |
+| `DeviceStats` | Performance by device type |
+| `HourlyStats` | Hourly performance breakdowns |
+| `BudgetStats` | Budget utilization metrics |
+
+Full field reference: [Google Ads Transfer documentation](https://cloud.google.com/bigquery/docs/google-ads-transfer)
 
 ---
 
 ## Notes
 
-- All cost and bid fields are in **micros** — divide by 1,000,000 to get real currency values
-- Always use `SAFE_DIVIDE()` for ratios to avoid division-by-zero errors
 - `customer_id` in these tables is the numeric Google Ads account ID without dashes
-- The Data Transfer runs once per day, usually overnight — data for today isn't available until tomorrow
+- tROAS is stored as a ratio (e.g., 4.0 = 400%)
+- Campaign status values: `ENABLED`, `PAUSED`, `REMOVED`
+- Keyword match types: `BROAD`, `PHRASE`, `EXACT`
